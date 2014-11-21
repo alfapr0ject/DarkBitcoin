@@ -663,13 +663,7 @@ public:
         return (nBits == 0);
     }
 
-    uint256 GetHash() const
-    {
-        if (nVersion > 6)
-            return Hash(BEGIN(nVersion), END(nNonce));
-        else
-            return GetPoWHash();
-    }
+    uint256 GetHash() const;
 
     uint256 GetPoWHash() const
     {

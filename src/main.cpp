@@ -955,6 +955,22 @@ CBlockIndex* FindBlockByHeight(int nHeight)
     return pblockindex;
 }
  
+std::map<uint256, uint256> blockHashes;
+
+uint256 CBlock::GetHash() const
+{
+    static uint256 genesis = uint256("0xef10b32afd53e4a6ebb8bdb0486c6acbe9b43afe3dfa538e913b89bb1319ff96");
+
+    std::map<uint256, uint256>::iterator it = blockHashes.find(hashMerkleRoot);
+    if (hashMerkleRoot == genesis || it == blockHashes.end()) {
+        uint256 hash = (nVersion > 6) ? Hash(BEGIN(nVersion), END(nNonce)) : GetPoWHash();
+        blockHashes.insert(make_pair(hashMerkleRoot, hash));
+        return hash;
+    }
+
+    return (*it).second;
+}
+
 bool CBlock::ReadFromDisk(const CBlockIndex* pindex, bool fReadTransactions)
 {
     if (!fReadTransactions)
