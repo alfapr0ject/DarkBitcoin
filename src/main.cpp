@@ -1997,8 +1997,11 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
 
     uint256 nBestBlockTrust = pindexBest->nHeight != 0 ? (pindexBest->nChainTrust - pindexBest->pprev->nChainTrust) : pindexBest->nChainTrust;
 
-    LogPrintf("SetBestChain: new best=%s  height=%d  trust=%s  blocktrust=%d  date=%s\n",
-      hashBestChain.ToString(), nBestHeight,
+    CBigNum bnTargetPerCoinDay;
+    bnTargetPerCoinDay.SetCompact(pindexBest->nBits);
+    LogPrintf("SetBestChain: target=%s  height=%d  trust=%s  blocktrust=%d  date=%s\n",
+      (bnTargetPerCoinDay>>200).ToString().c_str(),
+      nBestHeight,
       CBigNum(nBestChainTrust).ToString(),
       nBestBlockTrust.Get64(),
       DateTimeStrFormat("%x %H:%M:%S", pindexBest->GetBlockTime()));
