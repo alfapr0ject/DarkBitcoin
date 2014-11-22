@@ -150,6 +150,7 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "signrawtransaction", 2 },
     { "keypoolrefill", 0 },
     { "importprivkey", 2 },
+    { "validateoutputs", 0 },
 };
 
 class CRPCConvertTable
