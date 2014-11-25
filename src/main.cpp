@@ -2004,7 +2004,8 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
 
     CBigNum bnTargetPerCoinDay;
     bnTargetPerCoinDay.SetCompact(pindexBest->nBits);
-    LogPrintf("SetBestChain: target=%s  height=%d  trust=%s  blocktrust=%d  date=%s\n",
+    LogPrintf("SetBestChain: hash=%s  target=%s  height=%d  trust=%s  blocktrust=%d  date=%s\n",
+      hashBestChain.ToString().substr(0, 8),
       (bnTargetPerCoinDay>>200).ToString().c_str(),
       nBestHeight,
       CBigNum(nBestChainTrust).ToString(),
@@ -2158,9 +2159,20 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos, const u
     LOCK(cs_main);
 
     // New best
-    if (pindexNew->nChainTrust > nBestChainTrust)
+    if (pindexNew->nChainTrust > nBestChainTrust) {
         if (!SetBestChain(txdb, pindexNew))
             return false;
+    } else {
+        CBigNum bnTargetPerCoinDay;
+        bnTargetPerCoinDay.SetCompact(pindexNew->nBits);
+        LogPrintf("NotBestChain: hash=%s  target=%s  height=%d  trust=%s  blocktrust=%d  date=%s\n",
+                  hash.ToString().substr(0, 8),
+                  (bnTargetPerCoinDay>>200).ToString().c_str(),
+                  pindexNew->nHeight,
+                  CBigNum(pindexNew->nChainTrust).ToString(),
+                  (pindexNew->nChainTrust - pindexNew->pprev->nChainTrust).Get64(),
+                  DateTimeStrFormat("%x %H:%M:%S", pindexNew->GetBlockTime()));
+    }
 
     if (pindexNew == pindexBest)
     {
@@ -2598,6 +2610,8 @@ bool CBlock::SignBlock(CWallet& wallet, int64_t nFees)
                 return key.Sign(GetHash(), vchBlockSig);
             }
         }
+        LogPrintf("stake took %lds\n", GetAdjustedTime() - nSearchTime);
+
         nLastCoinStakeSearchInterval = nSearchTime - nLastCoinStakeSearchTime;
         nLastCoinStakeSearchTime = nSearchTime;
     }
