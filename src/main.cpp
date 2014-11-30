@@ -2632,6 +2632,8 @@ bool CBlock::SignBlock(CWallet& wallet, int64_t nFees)
 
     CKey key;
     CTransaction txCoinStake;
+    unsigned int nStartTime = txCoinStake.nTime;
+    txCoinStake.nTime += GetArg("-minerwarp", 0);
     if (IsProtocolV2(nBestHeight+1))
 	 txCoinStake.nTime &= ~STAKE_TIMESTAMP_MASK;
     int64_t nSearchTime = txCoinStake.nTime; // search to current time
@@ -2658,10 +2660,11 @@ bool CBlock::SignBlock(CWallet& wallet, int64_t nFees)
                 hashMerkleRoot = BuildMerkleTree();
 
                 // append a signature to our block
+                LogPrintf("good stake took %lds\n", GetAdjustedTime() - nStartTime);
                 return key.Sign(GetHash(), vchBlockSig);
             }
         }
-        LogPrintf("stake took %lds\n", GetAdjustedTime() - nSearchTime);
+        LogPrintf("stake took %lds\n", GetAdjustedTime() - nStartTime);
 
         nLastCoinStakeSearchInterval = nSearchTime - nLastCoinStakeSearchTime;
         nLastCoinStakeSearchTime = nSearchTime;
