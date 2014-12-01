@@ -25,6 +25,8 @@ int64_t nTransactionFee = MIN_TX_FEE;
 int64_t nReserveBalance = 0;
 int64_t nMinimumInputValue = 0;
 
+extern unsigned int nMaxStakeValue;
+
 static int64_t GetStakeSplitThreshold() { return 7 * COIN; } // before reward
 static int64_t GetStakeCombineThreshold() { return 1 * COIN; }
 
