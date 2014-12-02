@@ -14,7 +14,6 @@
 #include "kernel.h"
 #include "chainparams.h"
 #include "base58.h"
-#include "rpcserver.h"
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -1167,6 +1166,26 @@ const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex, bool fProofOfSta
     return pindex;
 }
  
+double GetDifficulty(unsigned int nBits) {
+    int nShift = (nBits >> 24) & 0xff;
+
+    double dDiff =
+        (double)0x0000ffff / (double)(nBits & 0x00ffffff);
+
+    while (nShift < 29)
+    {
+        dDiff *= 256.0;
+        nShift++;
+    }
+    while (nShift > 29)
+    {
+        dDiff /= 256.0;
+        nShift--;
+    }
+
+    return dDiff;
+}
+
 static unsigned int GetNextTargetRequiredV1(const CBlockIndex* pindexLast, bool fProofOfStake)
 {
     CBigNum bnTargetLimit = fProofOfStake ? bnProofOfStakeLimit : Params().ProofOfWorkLimit();
@@ -2053,13 +2072,13 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
     nTransactionsUpdated++;
 
     uint256 nBestBlockTrust = pindexBest->nHeight != 0 ? (pindexBest->nChainTrust - pindexBest->pprev->nChainTrust) : pindexBest->nChainTrust;
-    double difficulty = GetDifficulty(pindexBest);
 
     CBigNum bnTargetPerCoinDay;
     bnTargetPerCoinDay.SetCompact(pindexBest->nBits);
-    LogPrintf("SetBestChain: hash=%s  difficulty=%lf  height=%d  trust=%s  blocktrust=%d  date=%s\n",
+    LogPrintf("SetBestChain: hash=%s  difficulty=%lf -> %lf  height=%d  trust=%s  blocktrust=%d  date=%s\n",
       hashBestChain.ToString().substr(0, 8),
-      difficulty,
+      GetDifficulty(pindexBest->nBits),
+      GetDifficulty(GetNextTargetRequired(pindexBest, true)),
       nBestHeight,
       CBigNum(nBestChainTrust).ToString(),
       nBestBlockTrust.Get64(),
