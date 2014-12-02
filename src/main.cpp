@@ -2071,13 +2071,17 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
     nTimeBestReceived = GetTime();
     nTransactionsUpdated++;
 
+    uint256 nBestBlockTrust = pindexBest->nHeight != 0 ? (pindexBest->nChainTrust - pindexBest->pprev->nChainTrust) : pindexBest->nChainTrust;
+
     CBigNum bnTargetPerCoinDay;
     bnTargetPerCoinDay.SetCompact(pindexBest->nBits);
-    LogPrintf("SetBestChain: hash=%s  difficulty=%lf -> %lf  height=%d  date=%s\n",
+    LogPrintf("SetBestChain: hash=%s  difficulty=%lf -> %lf  height=%d  trust=%s  blocktrust=%d  date=%s\n",
       hashBestChain.ToString().substr(0, 8),
       GetDifficulty(pindexBest->nBits),
       GetDifficulty(GetNextTargetRequired(pindexBest, true)),
       nBestHeight,
+      CBigNum(nBestChainTrust).ToString(),
+      nBestBlockTrust.Get64(),
       DateTimeStrFormat("%x %H:%M:%S", pindexBest->GetBlockTime()));
 
     // Check the version of the last 100 blocks to see if we need to upgrade:
@@ -2233,9 +2237,9 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos, const u
     } else {
         CBigNum bnTargetPerCoinDay;
         bnTargetPerCoinDay.SetCompact(pindexNew->nBits);
-        LogPrintf("NotBestChain: hash=%s  target=%s  height=%d  trust=%s  blocktrust=%d  date=%s\n",
+        LogPrintf("NotBestChain: hash=%s  difficulty=%lf  height=%d  trust=%s  blocktrust=%d  date=%s\n",
                   hash.ToString().substr(0, 8),
-                  (bnTargetPerCoinDay>>200).ToString().c_str(),
+                  GetDifficulty(pindexNew->nBits),
                   pindexNew->nHeight,
                   CBigNum(pindexNew->nChainTrust).ToString(),
                   (pindexNew->nChainTrust - pindexNew->pprev->nChainTrust).Get64(),
