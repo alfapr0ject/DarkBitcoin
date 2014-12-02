@@ -14,6 +14,7 @@
 #include "kernel.h"
 #include "chainparams.h"
 #include "base58.h"
+#include "rpcserver.h"
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -2052,12 +2053,13 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
     nTransactionsUpdated++;
 
     uint256 nBestBlockTrust = pindexBest->nHeight != 0 ? (pindexBest->nChainTrust - pindexBest->pprev->nChainTrust) : pindexBest->nChainTrust;
+    double difficulty = GetDifficulty(pindexBest);
 
     CBigNum bnTargetPerCoinDay;
     bnTargetPerCoinDay.SetCompact(pindexBest->nBits);
-    LogPrintf("SetBestChain: hash=%s  target=%s  height=%d  trust=%s  blocktrust=%d  date=%s\n",
+    LogPrintf("SetBestChain: hash=%s  difficulty=%lf  height=%d  trust=%s  blocktrust=%d  date=%s\n",
       hashBestChain.ToString().substr(0, 8),
-      (bnTargetPerCoinDay>>200).ToString().c_str(),
+      difficulty,
       nBestHeight,
       CBigNum(nBestChainTrust).ToString(),
       nBestBlockTrust.Get64(),
