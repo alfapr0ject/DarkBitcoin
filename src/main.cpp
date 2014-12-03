@@ -972,7 +972,8 @@ uint256 CBlock::GetHash() const
     std::map<uint256, uint256>::iterator it = blockHashes.find(hashMerkleRoot);
     if (hashMerkleRoot == genesis || it == blockHashes.end()) {
         uint256 hash = (nVersion > 6) ? Hash(BEGIN(nVersion), END(nNonce)) : GetPoWHash();
-        blockHashes.insert(make_pair(hashMerkleRoot, hash));
+        if (hashMerkleRoot != genesis)
+            blockHashes.insert(make_pair(hashMerkleRoot, hash));
         return hash;
     }
 
