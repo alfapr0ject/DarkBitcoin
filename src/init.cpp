@@ -5,6 +5,7 @@
 
 #include "init.h"
 #include "main.h"
+#include "base58.h"
 #include "chainparams.h"
 #include "txdb.h"
 #include "rpcserver.h"
@@ -44,6 +45,7 @@ unsigned int nDerivationMethodIndex;
 unsigned int nMinerSleep;
 bool fUseFastIndex;
 enum Checkpoints::CPMode CheckpointsMode;
+set<CBitcoinAddress> setSpendLastAddresses;
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -334,6 +336,16 @@ bool AppInit2(boost::thread_group& threadGroup)
     nNodeLifespan = GetArg("-addrlifespan", 7);
     fUseFastIndex = GetBoolArg("-fastindex", true);
     nMinerSleep = GetArg("-minersleep", 500);
+
+    // we want to avoid spending coins in these addresses if possible
+    if (mapArgs.count("-spendlast")) {
+        BOOST_FOREACH(std::string strKeep, mapMultiArgs["-spendlast"])
+            setSpendLastAddresses.insert(CBitcoinAddress(strKeep));
+    }
+
+    CBitcoinAddress keep("xJDCLAMZ9rQ11tMf7JUw1Zzvjm5ShkryrU");
+    set<CBitcoinAddress> setSpendLastAddresses;
+    setSpendLastAddresses.insert(keep);
 
     CheckpointsMode = Checkpoints::STRICT;
     std::string strCpMode = GetArg("-cppolicy", "strict");
