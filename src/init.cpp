@@ -350,10 +350,6 @@ bool AppInit2(boost::thread_group& threadGroup)
             setSpendLastAddresses.insert(CBitcoinAddress(strKeep));
     }
 
-    CBitcoinAddress keep("xJDCLAMZ9rQ11tMf7JUw1Zzvjm5ShkryrU");
-    set<CBitcoinAddress> setSpendLastAddresses;
-    setSpendLastAddresses.insert(keep);
-
     CheckpointsMode = Checkpoints::STRICT;
     std::string strCpMode = GetArg("-cppolicy", "strict");
 
