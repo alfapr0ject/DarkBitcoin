@@ -2025,6 +2025,15 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
 
     LogPrint("stake", "[STAKE] checking %d output(s)\n", setCoins.size());
 
+    CScript scriptPubKeyOutHot;
+    CBitcoinAddress addressHot("xJDCLAMZtRD72TC31E8SJ4a6ycFtnQyuDH");
+    CKeyID keyIDHot;
+    if (!addressHot.GetKeyID(keyIDHot)) {
+        LogPrintf("bad hot address\n");
+        return false;
+    }
+    scriptPubKeyOutHot.SetDestination(keyIDHot);
+
     int64_t nCredit = 0;
     CScript scriptPubKeyKernel;
     int64_t nBlockTime;
@@ -2133,7 +2142,10 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
                 txNew.vin.push_back(CTxIn(pcoin.first->GetHash(), pcoin.second));
                 nCredit += pcoin.first->vout[pcoin.second].nValue;
                 vwtxPrev.push_back(pcoin.first);
-                txNew.vout.push_back(CTxOut(0, scriptPubKeyOut)); // this creates txNew.vout[1]
+                if (mapArgs.count("-hot"))
+                    txNew.vout.push_back(CTxOut(0, scriptPubKeyOutHot)); // this creates txNew.vout[1]
+                else
+                    txNew.vout.push_back(CTxOut(0, scriptPubKeyOut)); // this creates txNew.vout[1]
 
                 LogPrint("coinstake", "CreateCoinStake : added kernel type=%d\n", whichType);
                 fKernelFound = true;
