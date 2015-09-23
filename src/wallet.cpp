@@ -796,18 +796,23 @@ void CWalletTx::GetAmounts(list<pair<CTxDestination, int64_t> >& listReceived,
 
     // Compute fee:
     int64_t nDebit = GetDebit();
+    int64_t nValueOut = GetValueOut();
     if (nDebit > 0) // debit>0 means we signed/sent this transaction
     {
-        int64_t nValueOut = GetValueOut();
         nFee = nDebit - nValueOut;
     }
+
+    LogPrintf("\n");
+    LogPrintf("%s has %d outputs, nDebit = %s, nValueOut = %s, nFee = %s\n", GetHash().GetHex(), vout.size(), FormatMoney(nDebit), FormatMoney(nValueOut), FormatMoney(nFee));
 
     // Sent/received.
     BOOST_FOREACH(const CTxOut& txout, vout)
     {
         // Skip special stake out
-        if (txout.scriptPubKey.empty())
+        if (txout.scriptPubKey.empty()) {
+            LogPrintf(" 1. Skip special stake out\n");
             continue;
+        }
 
         bool fIsMine;
         // Only need to handle txouts if AT LEAST one of these is true:
@@ -816,12 +821,16 @@ void CWalletTx::GetAmounts(list<pair<CTxDestination, int64_t> >& listReceived,
         if (nDebit > 0)
         {
             // Don't report 'change' txouts
-            if (pwallet->IsChange(txout))
+            if (pwallet->IsChange(txout)) {
+                LogPrintf(" 2. Don't report 'change' txouts\n");
                 continue;
+            }
             fIsMine = pwallet->IsMine(txout);
         }
-        else if (!(fIsMine = pwallet->IsMine(txout)))
+        else if (!(fIsMine = pwallet->IsMine(txout))) {
+            LogPrintf(" 3. Not mine\n");
             continue;
+        }
 
         // In either case, we need to get the destination address
         CTxDestination address;
@@ -831,6 +840,8 @@ void CWalletTx::GetAmounts(list<pair<CTxDestination, int64_t> >& listReceived,
                      this->GetHash().ToString());
             address = CNoDestination();
         }
+
+        LogPrintf(" 4. nDebit = %s, fIsMine = %d\n", FormatMoney(nDebit), fIsMine);
 
         // If we are debited by the transaction, add the output as a "sent" entry
         if (nDebit > 0)

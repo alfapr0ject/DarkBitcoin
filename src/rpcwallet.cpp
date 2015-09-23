@@ -1298,11 +1298,16 @@ Value listaccounts(const Array& params, bool fHelp)
         // count staking reward in the appropriate account
         if (wtx.IsCoinStake()) {
             if (fCreditStakesToAccounts) {
-                CTxDestination td(listSent.front().first);
-                if (pwalletMain->mapAddressBook.count(td))
-                    mapAccountBalances[pwalletMain->mapAddressBook[td]] -= nFee;
-                else
+                if (listSent.size()) {
+                    CTxDestination td(listSent.front().first);
+                    if (pwalletMain->mapAddressBook.count(td))
+                        mapAccountBalances[pwalletMain->mapAddressBook[td]] -= nFee;
+                    else
+                        mapAccountBalances[""] -= nFee;
+                } else {
+                    LogPrintf("BAD: %s listSent is length %d and nFee is %s\n", wtx.GetHash().GetHex(), listSent.size(), FormatMoney(nFee));
                     mapAccountBalances[""] -= nFee;
+                }
             } else
                 mapAccountBalances[""] -= nFee;
             continue;
