@@ -2158,13 +2158,13 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
                     break;
                 }
                 LogPrint("coinstake", "CreateCoinStake : parsed kernel type=%d\n", whichType);
-                if (whichType != TX_PUBKEY && whichType != TX_PUBKEYHASH)
+                if (whichType != TX_PUBKEY && whichType != TX_PUBKEYHASH && whichType != TX_PUBKEYHASH_LOCKTIME)
                 {
                     LogPrint("stake", "[STAKE] fail %s:%-3d (%s CLAM) - bad kernel type\n",
                               pcoin.first->hash.ToString(), pcoin.second, FormatMoney(pcoin.first->vout[pcoin.second].nValue));
                     break;  // only support pay to public key and pay to address
                 }
-                if (whichType == TX_PUBKEYHASH) // pay to address type
+                if (whichType == TX_PUBKEYHASH || whichType == TX_PUBKEYHASH_LOCKTIME) // pay to address type
                 {
                     // convert to pay to public key type
                     stakingkeyID = uint160(vSolutions[0]);
