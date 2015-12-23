@@ -2282,7 +2282,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
             if ((fCombineAny ||
                  pcoin.first->vout[pcoin.second].scriptPubKey == scriptPubKeyKernel ||
                  pcoin.first->vout[pcoin.second].scriptPubKey == txNew.vout[1].scriptPubKey) &&
-                (pcoin.first->GetHash() != txNew.vin[0].prevout.hash ||
+                (pcoin.first->hash != txNew.vin[0].prevout.hash ||
                  pcoin.second != txNew.vin[0].prevout.n))
             {
                 // skip all remaining outputs if..
@@ -2295,7 +2295,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
                 if (nCredit + pcoin.first->vout[pcoin.second].nValue > nCombineLimit) // .. it causes the total to exceed the combine threshold
                     continue;
 
-                txNew.vin.push_back(CTxIn(pcoin.first->GetHash(), pcoin.second));
+                txNew.vin.push_back(CTxIn(pcoin.first->hash, pcoin.second));
                 nCredit += pcoin.first->vout[pcoin.second].nValue;
                 vwtxPrev.push_back(pcoin.first);
             }
