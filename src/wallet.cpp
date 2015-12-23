@@ -2088,12 +2088,14 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
     uint256 hashProofOfStake = 0;
     BOOST_FOREACH(PAIRTYPE(const CWalletTx*, unsigned int) pcoin, setCoins)
     {
+        if (!pcoin.first->hash)
+            pcoin.first->hash = pcoin.first->GetHash();
         
         CTransaction tx;
         uint256 hashBlock = 0;
         {
             LOCK2(cs_main, cs_wallet);
-            if (!GetTransaction(pcoin.first->GetHash(), tx, hashBlock, true))
+            if (!GetTransaction(pcoin.first->hash, tx, hashBlock, true))
                 continue;
         }
 
@@ -2187,7 +2189,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
                 }
 
                 txNew.nTime -= n;
-                txNew.vin.push_back(CTxIn(pcoin.first->GetHash(), pcoin.second));
+                txNew.vin.push_back(CTxIn(pcoin.first->hash, pcoin.second));
                 nCredit += pcoin.first->vout[pcoin.second].nValue;
                 vwtxPrev.push_back(pcoin.first);
                 txNew.vout.push_back(CTxOut(0, scriptPubKeyOut)); // this creates txNew.vout[1]
