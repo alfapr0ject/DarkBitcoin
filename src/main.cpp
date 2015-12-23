@@ -3696,12 +3696,12 @@ bool InitBlockIndex() {
         CBlock &block = const_cast<CBlock&>(Params().GenesisBlock());
         //// debug print
         uint256 hash = block.GetHash();
-        LogPrintf("-- GenesisBlock Details--");
+        LogPrintf("-- GenesisBlock Details----------\n");
         LogPrintf("---------------------------------");
         LogPrintf("%s\n", hash.ToString().c_str());
         LogPrintf("%s\n", block.hashMerkleRoot.ToString().c_str());
         block.print();
-        LogPrintf("---------------------------------");
+        LogPrintf("---------------------------------\n");
         assert(hash == Params().HashGenesisBlock());
 
         // Start new block file
